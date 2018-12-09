@@ -80,10 +80,10 @@ The final result looks like this:
 ![Blur][img_lane_lines]
 
 ### 2. Identify potential shortcomings with your current pipeline
-I think the current solution isn't robust enough to work in real life scenarios. There are some questions to clarify and to improved the stability accordingly.
+I think the current solution isn't robust enough to work in real life scenarios. There are some questions to clarify and to improve the stability accordingly.
 
 #### Question 1
-The current solution uses a fixed region of interest. This works well for the given test images. But all the test images contains flat roads with relative straight roads. What happens when the road has tight curves or great slopes, like serpentines?
+The current solution uses a fixed region of interest. This works well for the given test images. But all the test images contains flat and relative straight roads. What happens when the road has tight curves or great slopes, like serpentines?
 
 #### Question 2
 The test images contains empty roads with 2 clean lane lines and without disturbances, so the current solution works fine with these images. But what happens if the road contains more than 2 lines or some disturbing objects in the region of interest?
