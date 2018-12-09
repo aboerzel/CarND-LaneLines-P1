@@ -1,65 +1,103 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 # **Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-<img src="examples/laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
+## Writeup
 
-Overview
 ---
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+**Finding Lane Lines on the Road**
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
-
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
-
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
+The goals / steps of this project are the following:
+* Make a pipeline that finds lane lines on the road
+* Reflect on your work in a written report
 
 
-Creating a Great Writeup
+[//]: # (Image References)
+
+[img_grayscale]:  ./test_images_output/grayscale.jpg "Grayscale"
+[img_blur]:       ./test_images_output/blur.jpg "Blur"
+[img_canny]:      ./test_images_output/edge.jpg "Canny"
+[img_roi]:        ./test_images_output/roi.jpg "ROI"
+[img_hough]:      ./test_images_output/lines.jpg "Hough"
+[img_lane_lines]: ./test_images_output/lane_lines.jpg "Lane Lines"
+
 ---
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
+### Solution and Results
 
-1. Describe the pipeline
+* The solution can be found in [P1.ipynb](P1.ipynb).
+* Sample images with extrapolated lane lines can be found in 'test_images_output'.
+* Sample videos with extrapolated lane lines can be found in 'test_videos_output'.
 
-2. Identify any shortcomings
+### Reflection
 
-3. Suggest possible improvements
+### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-We encourage using images in your writeup to demonstrate how your pipeline works.  
+My pipeline consiste of the following 6 steps:
 
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
+#### 1. Grayscaling
+First I convert the image into a grayscale image, because we don't need colors for edge detection and it's easier to handle graysacle images with only one dimension instead of color images with three dimensions.
+I use the kernal size 15.
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+The result looks like this:
+![Grayscale][img_grayscale]
 
+#### 2. Gaussian Smooting
+The kernal size of the Gaussian filter: The smoothing filter used in the first stage directly affects the results of the Canny algorithm. Smaller filters cause less blurring, and allow detection of small, sharp lines. A larger filter causes more blurring, smearing out the value of a given pixel over a larger area of the image. Larger blurring radii are more useful for detecting larger, smoother edges.
 
-The Project
----
+The result looks like this:
+![Blur][img_blur]
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+#### 3. Canny Edge Detection
+Next I use the Canny Edge Detection algorithm to detect edges in the image.
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/83ec35ee-1e02-48a5-bdb7-d244bd47c2dc/lessons/8c82408b-a217-4d09-b81d-1bda4c6380ef/concepts/4f1870e0-3849-43e4-b670-12e6f2d4b7a7) if you haven't already.
+The result looks like this:
+![Blur][img_canny]
 
-**Step 2:** Open the code in a Jupyter Notebook
+#### 4. Region of Interest Filtering
+Assuming that the camera is centered on the front of the car, the road we want to detect in the image is in a triangular area, from the points at the bottom left, to about the center of the image and bottom right. This area is called 'region of interest'. All other areas of the image are not of interest, and therefore I mask out them in black. 
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out [Udacity's free course on Anaconda and Jupyter Notebooks](https://classroom.udacity.com/courses/ud1111) to get started.
+The result looks like this:
+![Blur][img_roi]
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
+#### 5. Hough Transform Line Detection
+The Canny Edge Detection returned many edges, but we want lines. I use the Hough Line Transform to transform the edges into lines.
 
-`> jupyter notebook`
+I use following parameters for Hough Line Transformation:
+* rho: 1
+* theta: PI / 180
+* threshold: 20
+* minLineLength: 20
+* maxLineGap: 300
 
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
+The result looks like this:
+![Blur][img_hough]
 
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
+#### 6. Lane Lines Calculation 
+The Hough Line Transformation returned many lines with different slope, intercept and length. But we want to detect only two line lanes, the right and the left one. The idea is to first split all lines into right lines and left lines by their slope. Then we can build the average of the right and left lines, the two averages corresponds to the right and left lane line. 
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+Finally I extrapolate the detected line lanes from the bottom of the image to the top of the region of interest.
 
-=======
-# CarND-LaneLines-P1
-Finding Lane Lines on the Road
->>>>>>> dc779db3017a32eeea94f488a87e10fa16846c81
-=======
+The final result looks like this:
+![Blur][img_lane_lines]
 
->>>>>>> 5668bd84851f498a171547f1126047cbdd23a6da
+### 2. Identify potential shortcomings with your current pipeline
+I think the current solution isn't robust enough to work in real life scenarios. There are some questions to clarify and to improved the stability accordingly.
+
+#### Question 1
+The current solution uses a fixed region of interest. This works well for the given test images. But all the test images contains flat roads with relative straight roads. What happens when the road has tight curves or great slopes, like serpentines?
+
+#### Question 2
+The test images contains empty roads with 2 clean lane lines and without disturbances, so the current solution works fine with these images. But what happens if the road contains more than 2 lines or some disturbing objects in the region of interest?
+
+#### Question 3
+All test images showing roads with the same light and weather conditions. The current parameters for the lane line detection were adapted accordingly to this conditions. But what happens in a wide variety of light and weather conditions such as strong sunshine, darkness, rain, fog, snow, etc.? Can we use only one parameter set for all these conditions?
+
+#### Question 4
+What happens if the road has no lane lines at all, or this is e.g. are concealed by snow?
+
+### 3. Suggest possible improvements to your pipeline
+
+To solve problem 1 we could try to adjust the region of interest dynamically to tight curves or great slopes.
+
+To solve problem 3 we could try to use different parameters for different light and weather conditions.
+
+The lane line detection could be encapsulated in a parameterized class, for reuse in different projects.
