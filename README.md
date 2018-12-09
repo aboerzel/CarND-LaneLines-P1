@@ -35,13 +35,13 @@ My pipeline consiste of the following 6 steps:
 
 #### 1. Grayscaling
 First I convert the image into a grayscale image, because we don't need colors for edge detection and it's easier to handle graysacle images with only one dimension instead of color images with three dimensions.
-I use the kernal size 15.
 
 The result looks like this:
 ![Grayscale][img_grayscale]
 
 #### 2. Gaussian Smooting
-The kernal size of the Gaussian filter: The smoothing filter used in the first stage directly affects the results of the Canny algorithm. Smaller filters cause less blurring, and allow detection of small, sharp lines. A larger filter causes more blurring, smearing out the value of a given pixel over a larger area of the image. Larger blurring radii are more useful for detecting larger, smoother edges.
+The kernal size of the Gaussian filter: The smoothing filter used in the first stage directly affects the results of the Canny algorithm. Smaller filters cause less blurring, and allow detection of small, sharp lines. A larger filter causes more blurring, smearing out the value of a given pixel over a larger area of the image. Larger blurring radii are more useful for detecting larger, smoother edges. 
+I use the kernal size 15.
 
 The result looks like this:
 ![Blur][img_blur]
